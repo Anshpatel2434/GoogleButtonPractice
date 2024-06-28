@@ -1,15 +1,12 @@
-import {
-  useGoogleLogin,
-  TokenResponse,
-  googleLogout,
-} from "@react-oauth/google";
-import { useEffect, useState } from "react";
+import { useGoogleLogin, TokenResponse } from "@react-oauth/google";
+import { useContext, useEffect, useState } from "react";
 import axios from "axios";
-import { SingupInput } from "../zod-types";
+import AskPassword from "../pages/AskPassword";
+import { AppContext } from "../context/AppContext";
 
 type User = Omit<TokenResponse, "error" | "error_description" | "error_uri">;
 
-interface UserProfile {
+export interface UserProfile {
   id: string;
   email: string;
   verified_email: boolean;
@@ -20,20 +17,15 @@ interface UserProfile {
   locale: string;
 }
 
-const GoogleButton = () => {
-  const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
-
+const GoogleButton: React.FC = () => {
   const [user, setUser] = useState<User | undefined>(undefined);
-  const [profile, setProfile] = useState<UserProfile | null>(null);
+  const context = useContext(AppContext);
 
-  //setting up the user in the backend
-  async function sendRequest(signup: SingupInput) {
-    try {
-      await axios.post(`${BACKEND_URL}/api/v1/user/signup`, signup);
-    } catch (error) {
-      alert("Error while signing up");
-    }
+  if (!context) {
+    throw new Error("GoogleButton must be used within an AppContextProvider");
   }
+
+  const { profile, setProfile } = context;
 
   //getting the main object after the user is logged in
   const login = useGoogleLogin({
@@ -45,11 +37,6 @@ const GoogleButton = () => {
     },
     onError: (error) => console.log("Login failed: ", error),
   });
-
-  const logOut = () => {
-    googleLogout();
-    setProfile(null);
-  };
 
   //getting the creditials of the loggined user
   useEffect(() => {
@@ -66,13 +53,6 @@ const GoogleButton = () => {
         )
         .then((res) => {
           setProfile(res.data);
-          console.log(res.data.name);
-          const signup: SingupInput = {
-            name: res.data.name,
-            email: res.data.email,
-            password: res.data.id,
-          };
-          sendRequest(signup);
         })
         .catch((err) => console.log(err));
     }
@@ -80,27 +60,7 @@ const GoogleButton = () => {
   return (
     <div className="flex flex-col items-center justify-center h-screen bg-gray-900 text-white">
       {profile ? (
-        <div className="text-center p-8 rounded-lg shadow-lg bg-gray-800">
-          <img
-            src={profile.picture}
-            alt="user image"
-            className="rounded-full w-20 h-20 mx-auto mb-4 border-4 border-gray-600"
-          />
-          <h3 className="text-xl font-bold">User Logged in</h3>
-          <p className="mt-2">Name: {profile.name}</p>
-          <p>Email Address: {profile.email}</p>
-          <p>ID: {profile.id}</p>
-          <p>Given Name: {profile.given_name}</p>
-          <p>Family Name: {profile.family_name}</p>
-          <p>Locale: {profile.locale}</p>
-          <br />
-          <button
-            onClick={logOut}
-            className="mt-4 bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-md focus:outline-none"
-          >
-            Log out
-          </button>
-        </div>
+        <AskPassword />
       ) : (
         <button
           onClick={() => login()}
