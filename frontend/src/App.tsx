@@ -1,9 +1,11 @@
-import React from 'react'
+import GoogleButton from "./components/GoogleButton";
 
-const App = () => {
+function App() {
   return (
-    <div>App</div>
-  )
+    <div>
+      <GoogleButton />
+    </div>
+  );
 }
 
-export default App
+export default App;

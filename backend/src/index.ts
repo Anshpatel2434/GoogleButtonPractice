@@ -5,7 +5,13 @@ import { cors } from "hono/cors";
 
 const app = new Hono();
 
+app.use(async (c, next) => {
+    c.header('Cross-Origin-Opener-Policy', 'same-origin-allow-popups');
+    await next();
+  });
 app.use("/*", cors());
+
+
 app.route("/api/v1/user", userRouter);
 app.route("/api/v1/order", orderRouter);
 
