@@ -1,5 +1,3 @@
-import React from "react";
-
 import {
   useGoogleLogin,
   TokenResponse,
@@ -27,19 +25,11 @@ const GoogleButton = () => {
 
   const [user, setUser] = useState<User | undefined>(undefined);
   const [profile, setProfile] = useState<UserProfile | null>(null);
-  const [signUpObj, setsignUpObj] = useState<SingupInput>({
-    name: "",
-    email: "",
-    password: "",
-  });
 
   //setting up the user in the backend
   async function sendRequest(signup: SingupInput) {
     try {
-      const response = await axios.post(
-        `${BACKEND_URL}/api/v1/user/signup`,
-        signup
-      );
+      await axios.post(`${BACKEND_URL}/api/v1/user/signup`, signup);
     } catch (error) {
       alert("Error while signing up");
     }
